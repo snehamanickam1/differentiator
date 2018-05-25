@@ -7,36 +7,64 @@ require "URLentry.php"
 // 3. Check source code of the home page
 
 
-function checkURL(URLentry){
+function checkURL($URLentry){
 
-  $url=URLentry;
+  $url=$URLentry->URL;
 
   if(strpos($url, 'forum')==true)
   {
-  	echo "page is forum";
+  	return "forum";
   }
   else if(strpos($url, 'blog')==true)
   {
-  	echo "page is blog";
+  	return "blog";
   }
   else if(strpos($url, 'review')==true)
   {
-  	echo "page is a review site";
+  	return "review";
   }
 
   else
   {
-
+    return "unknown"
   }
 }
 
 
 
-function differentiate(URLentry){
-  if(isCrawled(URLentry))
+function metaSearch($URLentry)
+{
+  $urlEn = $URLentry->URL;
+ $UrlEnter = get_meta_tags($urlEn);
+ $sourceUrl=file_get_contents($urlEn);
+ $url_encoded = htmlentities($sourceUrl);
+
+ $ArrayString = http_build_query($UrlEnter) . "\n";
+ if (stripos($ArrayString , "forum")>0)
+ {
+   return "forum";
+ }
+ elseif (stripos($ArrayString , "blog")>0)
+ {
+   return "blog";
+ }
+ elseif (stripos($ArrayString , "review")>0 || stripos($ArrayString , "rating")>0)
+ {
+   return "review";
+ }
+}
+
+
+
+
+
+
+function differentiate($URLentry){
+  $URLobj = isCrawledByMw($URLentry)
+  if($URLobj->type == null)
   {
 
-  }else if(checkURL(URLentry)) {
+  }
 
   }else if(){
 

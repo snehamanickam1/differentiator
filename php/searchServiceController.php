@@ -2,20 +2,18 @@
 require_once 'Requests-master/Requests-master/library/Requests.php';//library to connect to the server
 require "/URLentry.php"
 
-$fh_search_service = "http://mag-fh-searchservice.osl.basefarm.net:8080/";
-$urlArray = $_GET['uCheck'];
 
-function isCrawled(){
+function isCrawledByMw(URLentry){
+
+$url = URLentry->URL;
 $test=explode("\n", $urlArray);
 
-for ($i=0; $i < sizeof($test); $i++) {
     echo $test[$i]." -> ";
     $today = strtotime("now") * 1000;//date value in milliseconds
     $start_date = $today - (30 * 24 * 60 * 60 * 1000);//search last 60 days of data
     Requests::register_autoloader();
-    //$var = "https://www.zorgkaartnederland.nl/blog/*";
-    $NewVar = explode("/",$urlArray);
-    $New = $NewVar[0]."//".$NewVar[2]."/*";
+
+    $fullURL = "https://".$url."/*";
     //Json query to the server
     $json='{
         "query": {
@@ -31,7 +29,7 @@ for ($i=0; $i < sizeof($test); $i++) {
                 },
     			{
                     "field": "metaData.url",
-                    "value": "'.$New.'",
+                    "value": "'.$fullURL.'",
                     "type": "wildcard"
                 }
             ]
@@ -62,55 +60,31 @@ for ($i=0; $i < sizeof($test); $i++) {
      }
      ';
     $headers = array('Accept' => 'application/json','content-type' => 'application/json');
+    $fh_search_service = "http://mag-fh-searchservice.osl.basefarm.net:8080/";
+
     $result = Requests::post($fh_search_service, $headers ,$json);//Post request to the server
-    $myText = serialize($result);//Json object output is serialized
-    //echo $myText;
-    //if()
-    //echo (string) $myText['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'];
-    // $myfile = fopen("json_file.txt", "w") or die("Unable to open file!");
-    //     fwrite($myfile, $myText);
-    //     fclose($myfile);
-    //     $fname = fopen("json_file.txt","r") or die("Unable to open file!");
-    //     $content=fread($fname,filesize("json_file.txt"));
-    //     //echo $content;
-    //     $del = strstr($content, 'Connection: close');
-    //     $del1=str_replace("Connection: close", "",$del);
-    //     $del2= strstr($del1,'";s:7:"headers";', true);
-    //     $del3= strstr($del2, '{"views');
-    //     //echo $del3;
-    //     $fchange = fopen("json.json","w") or die("Unable to open file!");
-    //     fwrite($fchange, $del3);
-    //     fclose($fchange);
-    //     fclose($fname);
-    //     $str = file_get_contents('json.json');
-        $json = json_decode($myText, true);
-        //echo '<pre>' . print_r($json, true) . '</pre>';
-        echo "Vendor ".(string) $json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'];
-        if($json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] =="boardreader" || $json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] == "omgili" ||
-            $json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] == "mw" ||
-            $json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] == "ir" ||
-            $json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type']== "webhose")
-        {
-            if ($json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] == "omgili" ||
-                $json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] == "webhose")
-            {
-                echo " /Forum";
-            }
-            elseif ($json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] == "boardreader")
-            {
-                echo " /Review Site";
-            }
-            elseif ($json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] == "mw" ||
-                $json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type'] == "ir")
-            {
-                echo " /Blog";
-            }
-        }
-        else
-        {
-            echo "N/A";
+
+    $json = json_decode($result, true);
+    if(sizeof($json['views']['expressive']['results']) > 0){
+        switch($json['views']['expressive']['results']['0']['quiddity']['metaData']['provider']['type']){
+          case "boardreader":{
+            URLentry->type = "review";
+          }
+          case "mw":{
+            URLentry->type = "blog";
+          }
+          case "ir":{
+            URLentry->type = "beview";
+          }
+          case "webhose":{
+            URLentry->type = "forum";
+          }
+          default:{
+            URLentry->type = "unknown";
+          }
         }
 }
+return (URLentry)
 }
 
 ?>
