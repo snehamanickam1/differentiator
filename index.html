@@ -7,26 +7,25 @@ function clearField()
 }
 
 
-function urlCheck()
+function urlCheck(url)
 {
-	//alert("ds");
-
-	var uCheck=document.getElementById("url").value;
+	// var uCheck=document.getElementById("url").value;
+	var uCheck=url;
 		 var xmlhttp = new XMLHttpRequest();
 	          xmlhttp.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         alert("ds");
                         document.getElementById('maindiv').style.display = "block";
                         document.getElementById("maindiv").innerHTML = this.responseText;
-                        
+
                         }
                 };
                 xmlhttp.open("GET", "view.php?uCheck="+uCheck, true);
                 xmlhttp.send();
 }
-	 	
+
 	 </script>
-	
+
 </head>
 <table align="center"><tr><td colspan="2">
 <div class="form-group shadow-textarea">
@@ -49,4 +48,3 @@ function urlCheck()
 
 
 	</div></td></tr></table>
-                

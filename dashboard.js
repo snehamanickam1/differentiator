@@ -16,9 +16,9 @@ function urlCheck()
                         alert("ds");
                         document.getElementById('maindiv').style.display = "block";
                         document.getElementById("maindiv").innerHTML = this.responseText;
-                        
+
                         }
                 };
-                xmlhttp.open("GET", "view.php?uCheck="+uCheck, true);
+                xmlhttp.open("GET", "php/searchServiceController.php?uCheck="+uCheck, true);
                 xmlhttp.send();
 }
